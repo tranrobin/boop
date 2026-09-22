@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Boop</title>
+<style>
+  :root {
+    /* full palette */
+    --warm-cream: #F7F0E4;
+    --light-beige: #EEDFCC;
+    --maple-orange: #E96A2C;
+    --golden-mustard: #D8A13A;
+    --acorn-brown: #A56B3F;
+    --deep-brown: #5B3723;
+    --muted-teal: #86C6BE;
+    --berry: #D95636;
+
+    /* backgrounds */
+    --bg: var(--warm-cream);
+    --board-area: #F2E7D7;
+    --board-frame: var(--acorn-brown);
+    --cell: #FFF9F0;
+    --cell-alt: var(--light-beige);
+    --grid-line: #D4B99A;
+
+    /* cards */
+    --card-bg: #FFF8EE;
+    --card-border: #B88B63;
+
+    /* text */
+    --text: var(--deep-brown);
+    --text-secondary: #7A5440;
+    --muted: #9B7C68;
+    --text-on-dark: #FFF8EF;
+    --text-accent: var(--maple-orange);
+
+    /* states */
+    --selected-bg: #FBE5B8;
+    --selected-border: var(--golden-mustard);
+    --active-bg: #F7C98E;
+    --active-border: var(--maple-orange);
+    --disabled-bg: #E8DDD0;
+    --disabled-text: #9B8B7F;
+    --disabled-border: #CDB9A7;
+
+    /* buttons: primary */
+    --btn-primary-fill: var(--maple-orange);
+    --btn-primary-text: #FFF8EF;
+    --btn-primary-border: #C85720;
+    --btn-primary-hover: #D85F25;
+    --btn-primary-pressed: #BE511B;
+
+    /* buttons: secondary */
+    --btn-secondary-fill: var(--golden-mustard);
+    --btn-secondary-text: var(--deep-brown);
+    --btn-secondary-border: #B9852B;
+    --btn-secondary-hover: #C89230;
+    --btn-secondary-pressed: #AF7E28;
+
+    /* buttons: soft secondary */
+    --btn-soft-fill: var(--muted-teal);
+    --btn-soft-text: var(--deep-brown);
+    --btn-soft-border: #63AAA1;
+    --btn-soft-hover: #75BBB3;
+    --btn-soft-pressed: #5EA89F;
+
+    /* buttons: neutral */
+    --btn-neutral-fill: var(--warm-cream);
+    --btn-neutral-text: var(--deep-brown);
+    --btn-neutral-border: #C9B39A;
+    --btn-neutral-hover: #EFE4D3;
+    --btn-neutral-pressed: #E4D4BF;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { touch-action: manipulation; overscroll-behavior: none; height: 100%; }
+  body {
+    margin: 0;
+    height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: env(safe-area-inset-top,8px) env(safe-area-inset-right,8px) env(safe-area-inset-bottom,8px) env(safe-area-inset-left,8px);
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('screen2.png') repeat;
+    background-size: 420px auto;
+    opacity: 0.25;
+    z-index: 0;
+    pointer-events: none;
+  }
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+  .header-block {
+    background: rgba(247,240,228,0.88);
+    border-radius: 14px;
+    padding: 4px 20px 6px;
+    margin-top: clamp(6px, 2vh, 20px);
+    flex-shrink: 0;
+    text-align: center;
+  }
+  h1 {
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    margin: 2px 0 0;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+    text-align: center;
+  }
+  #role-banner {
+    margin-top: 4px;
+    font-size: clamp(0.65rem, 1.6vw, 0.8rem);
+    font-weight: 700;
+    color: var(--maple-orange);
+    text-align: center;
+  }
+
+  #room-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    gap: 20px;
+  }
+  #room-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 3px solid var(--acorn-brown);
+    padding: 24px 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(91,55,35,0.28);
+  }
+  #room-form label {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  #room-code-input {
+    font-size: 1.8rem;
+    letter-spacing: 8px;
+    text-align: center;
+    width: 160px;
+    padding: 10px;
+    border: 2px solid var(--card-border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    font-weight: 700;
+  }
+  #room-code-input:focus {
+    outline: none;
+    border-color: var(--maple-orange);
+  }
+  #room-join-btn {
+    background: var(--btn-primary-fill);
+    color: var(--btn-primary-text);
+    border: 2px solid var(--btn-primary-border);
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  #room-join-btn:hover { background: var(--btn-primary-hover); }
+  #room-join-btn:active { background: var(--btn-primary-pressed); }
+  #room-error {
+    color: var(--berry);
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-height: 1.2em;
+  }
+
+  .bottom-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-shrink: 0;
+  }
+  #reset-kick-btn {
+    background: var(--btn-neutral-fill);
+    color: var(--berry);
+    border: 2px solid var(--berry);
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+  #reset-kick-btn:hover { background: #fff0ed; }
+  #undo-btn {
+    background: var(--btn-soft-fill);
+    color: var(--btn-soft-text);
+    border: 2px solid var(--btn-soft-border);
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+  #undo-btn:hover { background: var(--btn-soft-hover); }
+  #undo-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  #game-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100dvh;
+    width: 100%;
+  }
+
+  .layout {
+    display: flex;
+    gap: clamp(6px, 1.2vw, 16px);
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: clamp(2px, 1vh, 12px);
+  }
+
+  .panel {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: clamp(10px, 1.5vw, 16px);
+    box-shadow: 0 4px 14px rgba(91,55,35,0.28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    width: clamp(120px, 15vw, 170px);
+    margin-top: 0;
+  }
+
+  .player-panel {
+    gap: 6px;
+    border: 3px solid var(--acorn-brown);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .player-panel.active {
+    border-color: var(--maple-orange);
+    background: var(--active-bg);
+    box-shadow: 0 0 0 4px rgba(233,106,44,0.35), 0 4px 14px rgba(91,55,35,0.28);
+  }
+  .player-name {
+    font-weight: 700;
+    font-size: clamp(1rem, 2.4vw, 1.3rem);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .swatch {
+    width: clamp(32px, 5vw, 46px); height: clamp(40px, 6.5vw, 58px);
+    display: inline-block;
+  }
+  .swatch img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+  }
+
+  .pool-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 10px;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+  }
+  .pool-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .pool-label {
+    font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .piece-btn {
+    width: clamp(46px, 8vw, 68px);
+    height: clamp(46px, 8vw, 68px);
+    display: flex; align-items: flex-end; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+    position: relative;
+  }
+  .piece-btn.kitten {
+    width: clamp(36.8px, 6.4vw, 54.4px);
+    height: clamp(36.8px, 6.4vw, 54.4px);
+  }
+  .piece-btn img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 2px 3px rgba(91,55,35,0.3));
+  }
+  .piece-btn:active { transform: scale(0.95); }
+  .piece-btn.selected {
+    transform: scale(1.12);
+  }
+  .piece-btn.selected::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%; height: 4px;
+    background: var(--golden-mustard);
+    border-radius: 2px;
+  }
+  .piece-btn.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
+  }
+
+  .count-badge {
+    font-size: clamp(0.75rem, 1.6vw, 0.9rem);
+    color: var(--muted);
+    margin-top: 1px;
+    font-weight: 600;
+  }
+
+  .center-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 0;
+    flex: 0 1 auto;
+  }
+
+  #status {
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    font-weight: 600;
+    text-align: center;
+    padding: 8px 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 10px;
+    margin: 4px 0 10px;
+    max-width: min(90vw, 500px);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(91,55,35,0.12);
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    background: var(--board-frame);
+    padding: 6px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(91,55,35,0.18);
+  }
+  .cell {
+    background: var(--cell);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cell:nth-child(odd) { background: var(--cell-alt); }
+  .cell.last-move-placed {
+    box-shadow: inset 0 0 0 3px var(--golden-mustard);
+    background: #FBE7B8;
+  }
+  .cell.last-move-moved {
+    box-shadow: inset 0 0 0 3px var(--muted-teal);
+    background: #DCF0EE;
+  }
+  .piece {
+    width: 92%; height: 92%;
+    display: flex; align-items: flex-end; justify-content: center;
+    transition: transform 0.25s ease;
+  }
+  .piece.kitten {
+    width: 73.6%; height: 73.6%; /* 80% of .cat's 92% */
+  }
+  .piece img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 2px 4px rgba(91,55,35,0.35));
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .piece.new { animation: pop 0.2s ease; }
+
+  @keyframes boop-grow {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    12% { opacity: 1; }
+    45% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
+  }
+  .boop-fx {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: min(60vw, 60vh, 420px);
+    height: min(60vw, 60vh, 420px);
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 40px rgba(91,55,35,0.3);
+    pointer-events: none;
+    z-index: 100;
+    animation: boop-grow 0.6s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+  }
+
+  .speech-bubble {
+    position: fixed;
+    top: 18%;
+    left: 50%;
+    transform: translate(-50%, -10px) scale(0.7);
+    background: #fff;
+    color: var(--text);
+    font-weight: 700;
+    font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+    padding: 10px 16px;
+    border-radius: 18px;
+    border: 3px solid var(--acorn-brown);
+    box-shadow: 0 6px 18px rgba(91,55,35,0.3);
+    max-width: min(70vw, 300px);
+    text-align: center;
+    z-index: 110;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+  .speech-bubble.anchored {
+    top: auto;
+    left: auto;
+    transform: translate(-50%, calc(-100% - 14px)) scale(0.7);
+  }
+  .speech-bubble.anchored.show {
+    transform: translate(-50%, calc(-100% - 14px)) scale(1);
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 14px 10px 0;
+    border-style: solid;
+    border-color: var(--acorn-brown) transparent transparent;
+  }
+  .speech-bubble.show {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  .fly-piece {
+    position: fixed;
+    z-index: 90;
+    pointer-events: none;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(91,55,35,0.35));
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  #win-banner {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    font-weight: 800;
+    color: var(--text-accent);
+    text-align: center;
+    background: rgba(91,55,35,0.25);
+    backdrop-filter: blur(2px);
+  }
+  #win-banner img {
+    width: clamp(160px, 36vw, 280px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(91,55,35,0.45);
+  }
+  #win-banner .win-text {
+    background: var(--card-bg);
+    border: 3px solid var(--card-border);
+    padding: 8px 24px;
+    border-radius: 12px;
+  }
+  #graduation-ui, #eight-piece-ui {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    padding: 10px 14px;
+    border-radius: 10px;
+    max-width: 100%;
+    margin-top: 6px;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+    flex-shrink: 0;
+    color: var(--text);
+  }
+
+  /* primary button (New Game) */
+  #new-game-btn {
+    background: var(--btn-primary-fill);
+    color: var(--btn-primary-text);
+    border: 2px solid var(--btn-primary-border);
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: clamp(0.75rem, 1.9vw, 0.9rem);
+    margin-top: 8px;
+  }
+  #new-game-btn:hover { background: var(--btn-primary-hover); }
+  #new-game-btn:active { background: var(--btn-primary-pressed); }
+
+  /* secondary button (graduation group choices, eight-piece actions) */
+  #graduation-options button, #eight-piece-ui button:not(#eight-skip-btn) {
+    background: var(--btn-secondary-fill);
+    color: var(--btn-secondary-text);
+    border: 2px solid var(--btn-secondary-border);
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  }
+  #graduation-options button:hover, #eight-piece-ui button:not(#eight-skip-btn):hover { background: var(--btn-secondary-hover); }
+  #graduation-options button:active, #eight-piece-ui button:not(#eight-skip-btn):active { background: var(--btn-secondary-pressed); }
+
+  /* neutral / plain button (skip actions) */
+  #skip-graduation, #eight-skip-btn {
+    background: var(--btn-neutral-fill);
+    color: var(--btn-neutral-text);
+    border: 2px solid var(--btn-neutral-border);
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  }
+  #skip-graduation:hover, #eight-skip-btn:hover { background: var(--btn-neutral-hover); }
+  #skip-graduation:active, #eight-skip-btn:active { background: var(--btn-neutral-pressed); }
+
+  @media (max-width: 700px), (orientation: portrait) {
+    .layout { flex-direction: column; gap: 8px; padding-top: 4px; }
+    .panel { flex-direction: row; align-items: center; gap: 14px; padding: 8px 14px; width: auto; max-width: 92vw; }
+    .player-name { min-width: auto; }
+    .center-col { max-width: 100%; width: 100%; flex: 1; order: 2; }
+    #panel-milk { order: 1; }
+    #panel-mocha { order: 3; }
+  }
+</style>
+</head>
+<body>
+
+<div id="room-screen">
+  <div class="header-block">
+    <h1>BOOP</h1>
+    <div class="subtitle">Get your cubs in a row. Graduate them into bears. Win with three bears in a row.</div>
+  </div>
+  <div id="room-form">
+    <label for="room-code-input">Enter a 4-digit room code</label>
+    <input id="room-code-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000">
+    <button id="room-join-btn">Join / Create Room</button>
+    <div id="room-error"></div>
+  </div>
+</div>
+
+<div id="game-screen" style="display:none;">
+  <div class="header-block">
+    <h1>BOOP</h1>
+    <div class="subtitle">Get your cubs in a row. Graduate them into bears. Win with three bears in a row.</div>
+  </div>
+
+  <div id="status">Milk to move! Place a Bear!</div>
+
+  <div class="layout">
+    <div class="panel player-panel" id="panel-milk">
+      <div class="player-name"><span class="swatch" id="swatch-milk"></span> Milk</div>
+      <div class="pool-label">Available</div>
+      <div class="pool-row" id="pool-milk"></div>
+    </div>
+
+    <div class="center-col">
+      <div id="board"></div>
+      <div id="win-banner"></div>
+      <div id="graduation-ui">
+        <div id="graduation-options" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;"></div>
+        <button id="skip-graduation">Skip</button>
+      </div>
+      <div id="eight-piece-ui">
+        <div>All 8 of your pieces are on the board:</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <button id="eight-graduate-btn">Graduate a Cub</button>
+          <button id="eight-retrieve-btn">Return a Bear to pool</button>
+          <button id="eight-skip-btn">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel player-panel" id="panel-mocha">
+      <div class="player-name"><span class="swatch" id="swatch-mocha"></span> Mocha</div>
+      <div class="pool-label">Available</div>
+      <div class="pool-row" id="pool-mocha"></div>
+    </div>
+  </div>
+
+  <div class="bottom-controls">
+    <button id="undo-btn">Undo</button>
+    <button id="reset-kick-btn">Reset Room (kicks everyone)</button>
+  </div>
+</div>
+
+<script>
+const SIZE = 6;
+const PLAYERS = ['milk', 'mocha'];
+const PLAYER_LABEL = { milk: 'Milk', mocha: 'Mocha' };
+const TYPE_LABEL = { kitten: 'Cub', cat: 'Bear' };
+const IMAGES = {
+  milk: { kitten: 'small_milk_final.png', cat: 'big_milk_final.png' },
+  mocha: { kitten: 'small_mocha_final.png', cat: 'big_mocha_final.png' }
+};
+
+let myRole = null; // 'milk' | 'mocha' | 'spectator', assigned by server
+let selectedType = 'kitten'; // 'kitten' or 'cat' currently selected to place (local UI only)
+let state = null; // latest state broadcast from server
+let ws;
+let currentRoomCode = null;
+let intentionalClose = false;
+
+function showRoomError(msg) {
+  document.getElementById('room-error').textContent = msg;
+}
+
+function connect(code) {
+  currentRoomCode = code;
+  intentionalClose = false;
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}?room=${encodeURIComponent(code)}`);
+
+  ws.addEventListener('open', () => {
+    document.getElementById('swatch-milk').innerHTML = `<img src="${IMAGES.milk.cat}" alt="Milk">`;
+    document.getElementById('swatch-mocha').innerHTML = `<img src="${IMAGES.mocha.cat}" alt="Mocha">`;
+  });
+
+  ws.addEventListener('message', (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type === 'assigned') {
+      myRole = msg.role;
+      updateRoleBanner();
+      showGameScreen();
+    } else if (msg.type === 'state') {
+      const prevState = state;
+      state = msg;
+      render(prevState);
+    } else if (msg.type === 'effects') {
+      const cellRects = captureCellRects();
+      if (msg.boopedAny) playBoopEffect();
+      for (const piece of msg.fellOff) {
+        animatePieceFallingOff(piece, cellRects);
+      }
+      if (msg.speechLine) {
+        setTimeout(() => showSpeechBubble(msg.speechLine), 600);
+      }
+    } else if (msg.type === 'kicked') {
+      intentionalClose = true;
+      returnToRoomScreen();
+    } else if (msg.type === 'error') {
+      intentionalClose = true;
+      showRoomError(msg.message);
+      document.getElementById('room-join-btn').disabled = false;
+    }
+  });
+
+  ws.addEventListener('close', () => {
+    if (intentionalClose) return;
+    setTimeout(() => connect(code), 1000);
+  });
+}
+
+function updateRoleBanner() {
+  const label = myRole === 'spectator' ? 'You are spectating' : `You are playing ${PLAYER_LABEL[myRole]}`;
+  let el = document.getElementById('role-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'role-banner';
+    document.querySelector('#game-screen .header-block').appendChild(el);
+  }
+  el.textContent = `${label} (Room ${currentRoomCode})`;
+}
+
+function showGameScreen() {
+  document.getElementById('room-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+  sizeBoard();
+}
+
+function returnToRoomScreen() {
+  state = null;
+  myRole = null;
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('room-screen').style.display = 'flex';
+  document.getElementById('room-join-btn').disabled = false;
+  const roleEl = document.getElementById('role-banner');
+  if (roleEl) roleEl.remove();
+  document.getElementById('room-code-input').value = '';
+  showRoomError('');
+}
+
+document.getElementById('room-join-btn').onclick = () => {
+  // guard against double-clicks / double-taps opening two sockets and stealing both seats
+  if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) return;
+  const code = document.getElementById('room-code-input').value.trim();
+  if (!/^\d{4}$/.test(code)) {
+    showRoomError('Enter exactly 4 digits.');
+    return;
+  }
+  showRoomError('');
+  document.getElementById('room-join-btn').disabled = true;
+  connect(code);
+};
+document.getElementById('room-code-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('room-join-btn').click();
+});
+
+document.getElementById('reset-kick-btn').onclick = () => {
+  if (confirm('Reset this room and kick everyone back to the entry screen?')) {
+    intentionalClose = true;
+    send({ action: 'resetAndKick' });
+  }
+};
+
+document.getElementById('undo-btn').onclick = () => {
+  send({ action: 'undo' });
+};
+
+function send(msg) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+}
+
+function placePiece(r, c) {
+  if (!state || state.gameOver) return;
+  if (state.pendingGraduationGroups || state.pendingEightPiece) return;
+  if (myRole !== state.current) return;
+  if (state.board[r][c]) return;
+  if (state.pools[myRole][selectedType] <= 0) return;
+  send({ action: 'place', r, c, pieceType: selectedType });
+}
+
+function captureCellRects() {
+  const rects = {};
+  document.querySelectorAll('#board .cell').forEach(cell => {
+    const r = cell.dataset.r, c = cell.dataset.c;
+    rects[`${r},${c}`] = cell.getBoundingClientRect();
+  });
+  return rects;
+}
+
+function showSpeechBubble(speechLine) {
+  const { text, at } = speechLine;
+  const bubble = document.createElement('div');
+  bubble.className = 'speech-bubble';
+  bubble.textContent = text;
+
+  // re-query the cell's live position now (not a stale pre-boop snapshot),
+  // since the board may have re-rendered/resized since the boop happened
+  const cellEl = at ? document.querySelector(`.cell[data-r="${at[0]}"][data-c="${at[1]}"]`) : null;
+  const rect = cellEl ? cellEl.getBoundingClientRect() : null;
+  if (rect) {
+    bubble.classList.add('anchored');
+    bubble.style.left = (rect.left + rect.width / 2) + 'px';
+    bubble.style.top = rect.top + 'px';
+  }
+
+  document.body.appendChild(bubble);
+  requestAnimationFrame(() => bubble.classList.add('show'));
+  setTimeout(() => bubble.classList.remove('show'), 1400);
+  setTimeout(() => bubble.remove(), 1800);
+}
+
+function playBoopEffect() {
+  const fx = document.createElement('div');
+  fx.className = 'boop-fx';
+  fx.style.backgroundImage = "url('booping.png')";
+  document.body.appendChild(fx);
+  fx.addEventListener('animationend', () => fx.remove());
+}
+
+function animatePieceFallingOff(piece, cellRects) {
+  const rect = cellRects[`${piece.from[0]},${piece.from[1]}`];
+  if (!rect) return;
+  const cardEl = document.getElementById(`panel-${piece.owner}`);
+  if (!cardEl) return;
+  const cardRect = cardEl.getBoundingClientRect();
+
+  const img = document.createElement('img');
+  img.src = IMAGES[piece.owner][piece.type];
+  img.className = 'fly-piece';
+  const size = piece.type === 'cat' ? 60 : 48;
+  img.style.width = size + 'px';
+  img.style.height = size + 'px';
+  const startLeft = rect.left + rect.width / 2 - size / 2;
+  const startTop = rect.top + rect.height / 2 - size / 2;
+  img.style.left = startLeft + 'px';
+  img.style.top = startTop + 'px';
+  document.body.appendChild(img);
+
+  // step 1: pop out one cell-width past the edge, in the push direction
+  const dr = piece.to[0] - piece.from[0];
+  const dc = piece.to[1] - piece.from[1];
+  const kickX = dc * rect.width * 0.85;
+  const kickY = dr * rect.height * 0.85;
+
+  img.style.transition = 'transform 0.22s cubic-bezier(0.3, 0, 0.6, 1)';
+  requestAnimationFrame(() => {
+    img.style.transform = `translate(${kickX}px, ${kickY}px) scale(1.05)`;
+  });
+
+  const targetX = cardRect.left + cardRect.width / 2 - (rect.left + rect.width / 2);
+  const targetY = cardRect.top + cardRect.height / 2 - (rect.top + rect.height / 2);
+
+  // step 2: after a hold, fly back to the owner's card
+  let flying = false;
+  setTimeout(() => {
+    flying = true;
+    img.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.6, 1), opacity 0.8s ease-in';
+    img.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.2)`;
+    img.style.opacity = '0';
+  }, 600);
+
+  img.addEventListener('transitionend', () => {
+    if (flying) img.remove();
+  });
+  setTimeout(() => img.remove(), 1700);
+}
+
+document.getElementById('skip-graduation').onclick = () => {
+  send({ action: 'skipGraduation' });
+};
+
+document.getElementById('eight-graduate-btn').onclick = () => {
+  send({ action: 'eightChoose', mode: 'graduate' });
+};
+document.getElementById('eight-retrieve-btn').onclick = () => {
+  send({ action: 'eightChoose', mode: 'retrieve' });
+};
+document.getElementById('eight-skip-btn').onclick = () => {
+  send({ action: 'eightSkip' });
+};
+
+function handleEightPieceCellClick(r, c) {
+  send({ action: 'eightCellClick', r, c });
+}
+
+function declareWin(winner) {
+  const banner = document.getElementById('win-banner');
+  const danceGif = winner === 'mocha' ? 'mochadance.gif' : 'milkdance.gif';
+  banner.innerHTML = `<img src="${danceGif}" alt="${PLAYER_LABEL[winner]} dancing"><div class="win-text">${PLAYER_LABEL[winner]} wins!</div><button id="new-game-btn">New Game</button>`;
+  banner.style.display = 'flex';
+  document.getElementById('new-game-btn').onclick = () => send({ action: 'newGame' });
+  document.getElementById('status').textContent = '';
+}
+
+function selectedTypeAvailable(player, type) {
+  return state.pools[player][type] > 0;
+}
+
+function updateStatus() {
+  if (state.gameOver) return;
+  document.getElementById('status').textContent = `${PLAYER_LABEL[state.current]} to move! Place a ${TYPE_LABEL[selectedType]}!`;
+}
+
+function render(prevState) {
+  if (!state) return;
+
+  if (!selectedTypeAvailable(state.current, selectedType)) {
+    selectedType = state.pools[state.current].kitten > 0 ? 'kitten' : 'cat';
+  }
+
+  renderBoard();
+  renderPools();
+  document.getElementById('panel-milk').classList.toggle('active', state.current === 'milk' && !state.gameOver);
+  document.getElementById('panel-mocha').classList.toggle('active', state.current === 'mocha' && !state.gameOver);
+
+  const undoBtn = document.getElementById('undo-btn');
+  const myUndosLeft = (myRole === 'milk' || myRole === 'mocha') ? state.undosLeft[myRole] : 0;
+  const canUndo = state.undoAvailableFor === myRole && myUndosLeft > 0 && !state.gameOver;
+  undoBtn.disabled = !canUndo;
+  undoBtn.textContent = `Undo my move (${myUndosLeft} left)`;
+
+  if (state.gameOver) {
+    if (!prevState || !prevState.gameOver) declareWin(state.winner);
+  } else {
+    document.getElementById('win-banner').style.display = 'none';
+    document.getElementById('win-banner').innerHTML = '';
+    if (state.pendingGraduationGroups) {
+      showGraduationUI(state.pendingGraduationGroups);
+    } else {
+      document.getElementById('graduation-ui').style.display = 'none';
+      if (state.pendingEightPiece) {
+        showEightPieceUI();
+      } else {
+        document.getElementById('eight-piece-ui').style.display = 'none';
+        updateStatus();
+      }
+    }
+  }
+  requestAnimationFrame(sizeBoard);
+}
+
+function showGraduationUI(groups) {
+  const ui = document.getElementById('graduation-ui');
+  const opts = document.getElementById('graduation-options');
+  opts.innerHTML = '';
+  groups.forEach((cells, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = groups.length > 1 ? `Graduate Line ${i + 1}` : 'Graduate';
+    btn.onclick = () => send({ action: 'graduate', groupIndex: i });
+    opts.appendChild(btn);
+  });
+  ui.style.display = 'flex';
+  document.getElementById('status').textContent = `${PLAYER_LABEL[state.current]} made 3 in a row! Now, graduate or skip?`;
+}
+
+function showEightPieceUI() {
+  const ui = document.getElementById('eight-piece-ui');
+  ui.style.display = 'flex';
+  document.getElementById('eight-graduate-btn').disabled = !state.hasKittenOnBoard;
+  document.getElementById('eight-graduate-btn').style.opacity = state.hasKittenOnBoard ? 1 : 0.4;
+  document.getElementById('eight-retrieve-btn').disabled = !state.hasCatOnBoard;
+  document.getElementById('eight-retrieve-btn').style.opacity = state.hasCatOnBoard ? 1 : 0.4;
+  if (state.eightPieceMode === 'graduate') {
+    document.getElementById('status').textContent = 'Tap one of your Cubs on the board to graduate it.';
+  } else if (state.eightPieceMode === 'retrieve') {
+    document.getElementById('status').textContent = 'Tap one of your Bears on the board to return it to your pool.';
+  } else {
+    document.getElementById('status').textContent = `${PLAYER_LABEL[state.current]}: all 8 pieces on board. Pick a special action or skip.`;
+  }
+}
+
+function renderBoard() {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+
+  const lastMove = state.lastMove;
+  const placedKey = lastMove ? `${lastMove.placedAt[0]},${lastMove.placedAt[1]}` : null;
+  const movedKeys = lastMove ? new Set(lastMove.movedTo.map(([r, c]) => `${r},${c}`)) : new Set();
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      const key = `${r},${c}`;
+      if (key === placedKey) {
+        cell.classList.add('last-move-placed');
+      } else if (movedKeys.has(key)) {
+        cell.classList.add('last-move-moved');
+      }
+      const p = state.board[r][c];
+      if (p) {
+        const piece = document.createElement('div');
+        piece.className = `piece ${p.owner} ${p.type}`;
+        const img = document.createElement('img');
+        img.src = IMAGES[p.owner][p.type];
+        img.alt = `${p.owner} ${p.type}`;
+        piece.appendChild(img);
+        cell.appendChild(piece);
+      }
+      cell.onclick = () => onCellClick(r, c);
+      boardEl.appendChild(cell);
+    }
+  }
+}
+
+function onCellClick(r, c) {
+  if (!state || state.gameOver) return;
+  if (state.pendingEightPiece) {
+    handleEightPieceCellClick(r, c);
+    return;
+  }
+  if (state.pendingGraduationGroups) return;
+  placePiece(r, c);
+}
+
+function renderPools() {
+  for (const player of PLAYERS) {
+    const poolEl = document.getElementById(`pool-${player}`);
+    poolEl.innerHTML = '';
+    if (state.pools[player].kitten > 0) {
+      poolEl.appendChild(makePoolButton(player, 'kitten', state.pools[player].kitten));
+    }
+    if (state.pools[player].cat > 0) {
+      poolEl.appendChild(makePoolButton(player, 'cat', state.pools[player].cat));
+    }
+    if (state.pools[player].kitten === 0 && state.pools[player].cat === 0) {
+      const span = document.createElement('span');
+      span.style.color = 'var(--muted)';
+      span.style.fontSize = '0.85rem';
+      span.textContent = 'None available';
+      poolEl.appendChild(span);
+    }
+  }
+}
+
+function makePoolButton(player, type, count) {
+  const btn = document.createElement('div');
+  btn.className = 'piece-btn ' + type;
+  const img = document.createElement('img');
+  img.src = IMAGES[player][type];
+  img.alt = `${player} ${type}`;
+  btn.appendChild(img);
+  const isMyTurn = player === myRole && player === state.current && !state.gameOver && !state.pendingGraduationGroups && !state.pendingEightPiece;
+  if (!isMyTurn) {
+    btn.classList.add('disabled');
+  } else {
+    if (selectedType === type) btn.classList.add('selected');
+    btn.onclick = () => {
+      selectedType = type;
+      updateStatus();
+      renderPools();
+    };
+  }
+  const badge = document.createElement('span');
+  badge.className = 'count-badge';
+  badge.textContent = `×${count}`;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pool-item';
+  wrapper.appendChild(btn);
+  wrapper.appendChild(badge);
+  return wrapper;
+}
+
+function sizeBoard() {
+  const boardEl = document.getElementById('board');
+  const centerCol = document.querySelector('.center-col');
+  const layout = document.querySelector('.layout');
+  const isStacked = getComputedStyle(layout).flexDirection === 'column';
+
+  const colRect = centerCol.getBoundingClientRect();
+  const usedHeight = Array.from(centerCol.children)
+    .filter(el => el.id !== 'board' && getComputedStyle(el).display !== 'none')
+    .reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
+  const availableHeight = colRect.height - usedHeight - 16;
+
+  let availableWidth;
+  if (isStacked) {
+    availableWidth = layout.getBoundingClientRect().width;
+  } else {
+    const panels = document.querySelectorAll('.panel');
+    const panelsWidth = Array.from(panels).reduce((sum, p) => sum + p.getBoundingClientRect().width, 0);
+    const gap = parseFloat(getComputedStyle(layout).gap) || 0;
+    availableWidth = layout.getBoundingClientRect().width - panelsWidth - gap * 2;
+  }
+
+  const size = Math.max(180, Math.min(availableWidth, availableHeight, 720));
+  boardEl.style.width = size + 'px';
+  boardEl.style.height = size + 'px';
+}
+
+window.addEventListener('resize', sizeBoard);
+window.addEventListener('orientationchange', () => setTimeout(sizeBoard, 100));
+
+document.getElementById('room-code-input').focus();
+</script>
+</body>
+</html>

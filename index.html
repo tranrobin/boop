@@ -83,7 +83,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: env(safe-area-inset-top,8px) env(safe-area-inset-right,8px) env(safe-area-inset-bottom,8px) env(safe-area-inset-left,8px);
     user-select: none;
     -webkit-user-select: none;
     overflow: hidden;
@@ -102,6 +101,11 @@
   body > * {
     position: relative;
     z-index: 1;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 8px);
+    padding-right: env(safe-area-inset-right, 8px);
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    padding-left: env(safe-area-inset-left, 8px);
   }
   .header-block {
     background: rgba(247,240,228,0.88);
@@ -136,7 +140,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100dvh;
+    height: 100%;
     gap: 20px;
   }
   #room-form {
@@ -194,6 +198,7 @@
     display: flex;
     gap: 10px;
     margin-top: 10px;
+    margin-bottom: clamp(6px, 2vh, 20px);
     flex-shrink: 0;
   }
   #reset-kick-btn {
@@ -227,7 +232,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100dvh;
+    height: 100%;
     width: 100%;
   }
 
@@ -592,10 +597,18 @@
   #skip-graduation:active, #eight-skip-btn:active { background: var(--btn-neutral-pressed); }
 
   @media (max-width: 700px), (orientation: portrait) {
-    .layout { flex-direction: column; gap: 8px; padding-top: 4px; }
-    .panel { flex-direction: row; align-items: center; gap: 14px; padding: 8px 14px; width: auto; max-width: 92vw; }
+    .layout { flex-direction: column; gap: 8px; padding-top: 4px; align-items: center; }
+    .panel {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 8px 14px;
+      width: min(92vw, 340px);
+      max-width: 92vw;
+    }
     .player-name { min-width: auto; }
-    .center-col { max-width: 100%; width: 100%; flex: 1; order: 2; }
+    .center-col { max-width: 100%; width: 100%; flex: 1; order: 2; align-items: center; }
     #panel-milk { order: 1; }
     #panel-mocha { order: 3; }
   }
